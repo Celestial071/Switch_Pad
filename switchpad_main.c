@@ -13,6 +13,8 @@
 #define BIT7 0b00000010
 #define BIT8 0b00000001
 
+
+
 bool tryHandshake(HANDLE hSerial) {
     // Clear any previous data
     PurgeComm(hSerial, PURGE_RXCLEAR | PURGE_TXCLEAR);
@@ -77,9 +79,9 @@ HANDLE autoDetectArduinoPort() {
         // Set the timeouts for the serial port
         COMMTIMEOUTS timeouts = {0};
         timeouts.ReadIntervalTimeout = MAXDWORD;
-        timeouts.ReadTotalTimeoutConstant = 5000; // Set to 5 seconds
+        timeouts.ReadTotalTimeoutConstant = 2000; 
         timeouts.ReadTotalTimeoutMultiplier = 0;
-        timeouts.WriteTotalTimeoutConstant = 5000; // Also 5 seconds for writes
+        timeouts.WriteTotalTimeoutConstant = 2000;
         timeouts.WriteTotalTimeoutMultiplier = 0;
         if (!SetCommTimeouts(hSerial, &timeouts)) {
             CloseHandle(hSerial);
@@ -87,7 +89,7 @@ HANDLE autoDetectArduinoPort() {
         }
 
         PurgeComm(hSerial, PURGE_RXCLEAR | PURGE_TXCLEAR);
-        Sleep(2000); // Give Arduino time to reset
+        Sleep(3000); // Give Arduino time to reset
 
         if (tryHandshake(hSerial)) {
             printf("Arduino detected on %s\n", portName);
@@ -127,10 +129,10 @@ void analyze_mouse(uint8_t d){
     GetCursorPos(&p);
     int8_t x_offset = 0;
     int8_t y_offset = 0;
-    if(d&BIT4) y_offset -= 7;
-    if(d&BIT5) y_offset += 7;
-    if(d&BIT6) x_offset += 12;
-    if(d&BIT7) x_offset -= 12;
+    if(d&BIT4) x_offset += 7;
+    if(d&BIT5) x_offset -= 7;
+    if(d&BIT6) y_offset -= 12;
+    if(d&BIT7) y_offset += 12;
 
     //combining all
     SetCursorPos(p.x+x_offset, p.y + y_offset);
@@ -164,78 +166,11 @@ void analyze_joystick(uint8_t d){
     if(d&BIT3) PressKey('S');
     if(d&BIT4) PressKey(VK_UP);
     if(d&BIT5) PressKey(VK_DOWN);
-    if(d&BIT6) PressKey(VK_LEFT);
-    if(d&BIT7) PressKey (VK_RIGHT);
+    if(d&BIT6) PressKey(VK_RIGHT);
+    if(d&BIT7) PressKey (VK_LEFT);
 }
 bool check = false;
 int main(){
-    //configure COM_Port
-    /*char *portName = "\\\\.\\COM8"; //currently in COM8 for testing purpose
-    HANDLE hSerial;
-
-    hSerial = CreateFile(portName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    
-    //error handling
-    if(hSerial == INVALID_HANDLE_VALUE){
-        if(GetLastError() == ERROR_FILE_NOT_FOUND){
-            //serial port does not exist
-            printf("Serial Port %s not found!\n", portName);
-        }
-        printf("Error opening port %s\n", portName);
-    }
-
-    DCB dcbSerialParams = {0};
-    dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
-    if(!GetCommState(hSerial, &dcbSerialParams)){
-        //error getting current serial params
-        printf("Error getting serial port State\n");
-        return -1;
-    }
-
-    dcbSerialParams.BaudRate = CBR_9600;
-    dcbSerialParams.ByteSize = 8;
-    dcbSerialParams.StopBits = ONESTOPBIT;
-    dcbSerialParams.Parity = NOPARITY;
-
-    if(!SetCommState(hSerial, &dcbSerialParams)){
-        printf("Error setting serial com because the parameter is wrong (arduino and program aren't synced)\n");
-        return 1;
-    }
-
-    //setting timeouts what are those?
-    COMMTIMEOUTS timeouts = {0};
-    timeouts.ReadIntervalTimeout = 50;
-    timeouts.ReadTotalTimeoutConstant = 50;
-    timeouts.ReadTotalTimeoutMultiplier = 10;
-    timeouts.WriteTotalTimeoutConstant = 50;
-    timeouts.WriteTotalTimeoutMultiplier = 10;
-    if(!SetCommTimeouts(hSerial, &timeouts)){
-        printf("Error setting serial port timeouts.."); //ok but what does a timeout do?
-        return 1;
-    }
-
-    uint8_t data = 0;
-    DWORD dwBytesRead = 0;
-    while(1){
-        if(!ReadFile(hSerial, &data, sizeof(uint8_t), &dwBytesRead, NULL)){
-            printf("Error Reading data from serial port\n");
-            return 1;
-        }
-        if(dwBytesRead > 0)
-            printf("Read %d bytes: %u\n", dwBytesRead, data);
-        else
-            Sleep(100);
-        //trying to decode the information bits that was send...
-        //since data is already encoded in the arduino we can just check for it and be happy
-        toggle = data & BIT8;
-        if(toggle)  analyze_mouse(data);
-        else    analyze_joystick(data);
-        data |= toggle;
-        Sleep(100);
-    }
-    //close serial port
-    CloseHandle(hSerial);*/
-
     //new implementation
     HANDLE hSerial = INVALID_HANDLE_VALUE;
     uint8_t toggle = 0x0;
@@ -249,11 +184,18 @@ int main(){
         hSerial = autoDetectArduinoPort();
     }
     printf("Communication with Arduino established.\n");
-
+    /*COMMTIMEOUTS timeouts = {0};
+    timeouts.ReadIntervalTimeout = MAXDWORD; // Immediate return
+    timeouts.ReadTotalTimeoutConstant = 0;   // No additional wait time
+    timeouts.ReadTotalTimeoutMultiplier = 0; // No multiplier
+    if(!SetCommTimeouts(hSerial, &timeouts)){
+        printf("Error setting timeouts.\n");
+        CloseHandle(hSerial);
+        return -1;
+    }*/
     while (1) {
         // Check connection and read data from Arduino
         DWORD bytesRead;
-
         if (!ReadFile(hSerial, &data, sizeof(data), &bytesRead, NULL)) {
             printf("Arduino connection lost. Attempting to reconnect...\n");
             CloseHandle(hSerial);
@@ -265,20 +207,28 @@ int main(){
             }
             printf("Communication with Arduino re-established.\n");
             continue;
-        }else{
+        }/*else{
             if(bytesRead > 0 && data != prevData){
                 //means new data different than prev has been read
                 prevData = data;
             }
-        }
-        //toggle here checks for toggling
+        }*/
         //all thats needed now is for the program to keep on executing the code whenever state isn't changed but also execute it once when state is changed and if the state is still not changed then that means it will keep on excuting the code
         //why is this so slowww aaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        COMMTIMEOUTS timeouts = {0};
+        timeouts.ReadIntervalTimeout = MAXDWORD; // Immediate return
+        timeouts.ReadTotalTimeoutConstant = 0;   // No additional wait time
+        timeouts.ReadTotalTimeoutMultiplier = 0; // No multiplier
+        if(!SetCommTimeouts(hSerial, &timeouts)){
+            printf("Error setting timeouts.\n");
+            CloseHandle(hSerial);
+            return -1;
+        }
+        //need to make sure buttons aren't triggered alot of times and that will be the most beautiful addition to make this almost perfect
         toggle = data & BIT8;
-        if(toggle)  analyze_mouse(data);
-        else analyze_joystick(data);
+        toggle?analyze_mouse(data):analyze_joystick(data);
         printBinary(data);
-        //Sleep(10);
+        Sleep(100);
 
    }
     CloseHandle(hSerial);
