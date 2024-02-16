@@ -51,7 +51,7 @@ void loop() {
     if(analogRead(A0) < 250)  data |= BIT7;
     if(analogRead(A0) > 750)  data |= BIT6;
 
-    Serial.println(data);
+    Serial.write(data);
   }
   data = 0x0;
 }
