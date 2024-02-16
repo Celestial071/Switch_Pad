@@ -264,7 +264,7 @@ int main(){
             }
             printf("Communication with Arduino re-established.\n");
             continue;
-        }else{
+        }/*else{
             if(data != prevData){
                 toggle = data & BIT8;
                 if(toggle){
@@ -273,8 +273,15 @@ int main(){
                 printBinary(data);
                 prevData = data;
             }
-        }
-        Sleep(100);
+        }*/
+        //toggle here checks for toggling
+        //all thats needed now is for the program to keep on executing the code whenever state isn't changed but also execute it once when state is changed and if the state is still not changed then that means it will keep on excuting the code
+        toggle = data & BIT8;
+        if(toggle)  analyze_mouse(data);
+        else analyze_joystick(data);
+        printBinary(data);
+        Sleep(10);
+
    }
     CloseHandle(hSerial);
     return 0;
