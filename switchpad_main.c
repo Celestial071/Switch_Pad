@@ -65,7 +65,7 @@ HANDLE autoDetectArduinoPort() {
         }
 
         // Configure the serial port settings
-        dcbSerialParams.BaudRate = CBR_9600;
+        dcbSerialParams.BaudRate = CBR_115200;
         dcbSerialParams.ByteSize = 8;
         dcbSerialParams.StopBits = ONESTOPBIT;
         dcbSerialParams.Parity = NOPARITY;
@@ -253,7 +253,8 @@ int main(){
     while (1) {
         // Check connection and read data from Arduino
         DWORD bytesRead;
-        if (!ReadFile(hSerial, &data, sizeof(data), &bytesRead, NULL) || bytesRead == 0) {
+
+        if (!ReadFile(hSerial, &data, sizeof(data), &bytesRead, NULL)) {
             printf("Arduino connection lost. Attempting to reconnect...\n");
             CloseHandle(hSerial);
             hSerial = autoDetectArduinoPort();
@@ -264,23 +265,20 @@ int main(){
             }
             printf("Communication with Arduino re-established.\n");
             continue;
-        }/*else{
-            if(data != prevData){
-                toggle = data & BIT8;
-                if(toggle){
-                    analyze_mouse(data);
-                }else   analyze_joystick(data);
-                printBinary(data);
+        }else{
+            if(bytesRead > 0 && data != prevData){
+                //means new data different than prev has been read
                 prevData = data;
             }
-        }*/
+        }
         //toggle here checks for toggling
         //all thats needed now is for the program to keep on executing the code whenever state isn't changed but also execute it once when state is changed and if the state is still not changed then that means it will keep on excuting the code
+        //why is this so slowww aaaaaaaaaaaaaaaaaaaaaaaaaaaa
         toggle = data & BIT8;
         if(toggle)  analyze_mouse(data);
         else analyze_joystick(data);
         printBinary(data);
-        Sleep(10);
+        //Sleep(10);
 
    }
     CloseHandle(hSerial);
