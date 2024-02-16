@@ -21,3 +21,7 @@ Current Problem I am facing:-
 
 
 I will provide the circuit diagram and component after the switchpad is fully functional. Thank you.
+
+Currently known bugs or things to fix:
+1. first is making sure button gets clicked once every well click
+2. defining a better polling rate to reduce cpu usage.
