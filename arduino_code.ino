@@ -14,10 +14,13 @@ uint8_t prevData = 0xFF;
 uint8_t toggle = 0x0;
 uint8_t button[] = {2, 3, 4, 5};
 bool handshake_accept = false;
+bool but1_down = false;
+bool but2_down = false;
+bool but3_down = false;
 bool check = false; // Used for toggling BIT8
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(2000);
   // Initialize button pins as inputs
   for (int i = 0; i < 4; i++) {
@@ -40,9 +43,34 @@ void loop() {
     }
   } else {
     data = 0x0;
-    if (digitalRead(button[0])) data |= BIT1;
-    if (digitalRead(button[2])) data |= BIT2;
-    if (digitalRead(button[3])) data |= BIT3;
+    if (digitalRead(button[0])){
+      if(!but1_down){
+        data |= BIT1;
+        but1_down = true;
+      }
+    }else{
+      but1_down = false;
+      //might need to reset the bit on button 3
+    }
+    if (digitalRead(button[2])){
+      if(!but2_down){
+      data |= BIT2;
+      but2_down = true;
+      }
+    }else{
+      but2_down = false;
+      //might need to reset the bit on button 2
+    }
+    if (digitalRead(button[3])){
+      if(!but3_down){ 
+        data |= BIT3;
+        but3_down = true;
+      }
+    }else{
+      but3_down = false;
+      //might need to reset the bit of button3
+    }
+  
     if (analogRead(A1) < 250) data |= BIT5;
     if (analogRead(A1) > 750) data |= BIT4;
     if (analogRead(A0) < 250) data |= BIT7;
