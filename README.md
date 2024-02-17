@@ -15,8 +15,8 @@ Features:
 
 
 Current Problem I am facing:-
-1. Arduino Starts from a garbage value and will only stabilize after a while.
-2. using state change to register button presses has resulted in no new data being register.
+1. Arduino Starts from a garbage value and will only stabilize after a while. ------> fixed as initially it can only send 0
+2. using state change to register button presses has resulted in no new data being register. -------> fixed by resetting timieouts only during times I need to read files whereas not during reconnection
 3. Currently arduino initializes the handshaking so if by any chance the program closes you will have to rerun the program and also reconnect the arduino to reconnect.
 
 
