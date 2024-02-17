@@ -13,8 +13,6 @@
 #define BIT7 0b00000010
 #define BIT8 0b00000001
 
-
-
 bool tryHandshake(HANDLE hSerial) {
     // Clear any previous data
     PurgeComm(hSerial, PURGE_RXCLEAR | PURGE_TXCLEAR);
@@ -138,7 +136,7 @@ void analyze_mouse(uint8_t d){
     SetCursorPos(p.x+x_offset, p.y + y_offset);
 
     //lets assume 'a' first bit is left mouse button and 'c' is right mouse button
-    if(d&BIT1){
+    if(d&BIT2){
         INPUT input = {0};
         input.type = INPUT_MOUSE;
         input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
@@ -161,14 +159,15 @@ void analyze_mouse(uint8_t d){
 }
 
 void analyze_joystick(uint8_t d){
-    if(d&BIT2) PressKey(VK_SPACE);
-    if(d&BIT2) PressKey(VK_RETURN);
-    if(d&BIT3) PressKey('S');
-    if(d&BIT4) PressKey(VK_UP);
-    if(d&BIT5) PressKey(VK_DOWN);
-    if(d&BIT6) PressKey(VK_RIGHT);
-    if(d&BIT7) PressKey (VK_LEFT);
+    if(d&BIT1) PressKey(VK_RETURN);
+    if(d&BIT2) PressKey('S');
+    if(d&BIT3) PressKey(VK_SPACE);
+    if(d&BIT4) PressKey(VK_RIGHT);
+    if(d&BIT5) PressKey(VK_LEFT);
+    if(d&BIT6) PressKey(VK_UP);
+    if(d&BIT7) PressKey (VK_DOWN);
 }
+
 bool check = false;
 int main(){
     //new implementation
@@ -225,10 +224,11 @@ int main(){
             return -1;
         }
         //need to make sure buttons aren't triggered alot of times and that will be the most beautiful addition to make this almost perfect
+
         toggle = data & BIT8;
         toggle?analyze_mouse(data):analyze_joystick(data);
         printBinary(data);
-        Sleep(100);
+        Sleep(10);
 
    }
     CloseHandle(hSerial);

@@ -52,7 +52,7 @@ void loop() {
       but1_down = false;
       //might need to reset the bit on button 3
     }
-    if (digitalRead(button[2])){
+    if (digitalRead(button[1])){
       if(!but2_down){
       data |= BIT2;
       but2_down = true;
@@ -61,7 +61,7 @@ void loop() {
       but2_down = false;
       //might need to reset the bit on button 2
     }
-    if (digitalRead(button[3])){
+    if (digitalRead(button[2])){
       if(!but3_down){ 
         data |= BIT3;
         but3_down = true;
@@ -76,7 +76,7 @@ void loop() {
     if (analogRead(A0) < 250) data |= BIT7;
     if (analogRead(A0) > 750) data |= BIT6;
 
-    if (digitalRead(button[1])) {
+    if (digitalRead(button[3])) {
       if (!check) {
         toggle ^= BIT8; // Toggle the state of BIT8
         check = true;
