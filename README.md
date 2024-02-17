@@ -25,3 +25,4 @@ I will provide the circuit diagram and component after the switchpad is fully fu
 Currently known bugs or things to fix:
 1. first is making sure button gets clicked once every well click   -----> this is fixed now.
 2. defining a better polling rate to reduce cpu usage.
+3. Some places demand for more mouse click and I don't know what I can do about it (resizing by dragging from a corner isn't possible atm).
