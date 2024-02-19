@@ -1,5 +1,6 @@
 # Switch_Pad
 Switch Pad is a ardruino based gaming controller wannabe. It is implemented by mapping keyboard keys as controller's buttons. While also adding a toggling mechanism by which you can toggle to use your controller as a Mouse.
+This project happens to be my version of https://github.com/Sanjog34/gaming_controller (My version is supposed to fix the lagging issue my good friend had with his python implementation, though incomplete my version has no lag and is completely written in C). 
 
 The arduino I used happens to be a arduino Nano.
 
